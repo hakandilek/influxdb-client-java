@@ -21,6 +21,8 @@
  */
 package com.influxdb.internal;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -38,8 +40,6 @@ import com.influxdb.query.internal.FluxResultMapper;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import okio.BufferedSource;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -53,17 +53,12 @@ public abstract class AbstractQueryApi extends AbstractRestClient {
 
     protected final FluxCsvParser fluxCsvParser = new FluxCsvParser();
     protected final FluxResultMapper resultMapper = new FluxResultMapper();
+    private final Gson gson = new GsonBuilder()
+        .create();
 
     protected static final Runnable EMPTY_ACTION = () -> {
 
     };
-
-    protected static final JSONObject DEFAULT_DIALECT = new JSONObject()
-            .put("header", true)
-            .put("delimiter", ",")
-            .put("quoteChar", "\"")
-            .put("commentPrefix", "#")
-            .put("annotations", new JSONArray().put("datatype").put("group").put("default"));
 
     protected static final Consumer<Throwable> ERROR_CONSUMER = throwable -> {
         if (throwable instanceof InfluxException) {
@@ -77,14 +72,14 @@ public abstract class AbstractQueryApi extends AbstractRestClient {
     protected RequestBody createBody(@Nullable final String dialect, @Nonnull final String query) {
 
         Arguments.checkNonEmpty(query, "Flux query");
-        JSONObject json = new JSONObject()
-                .put("query", query);
+        QueryDialect dialectObject = (dialect == null || "".equals(dialect))
+            ? null
+            : gson.fromJson(dialect, QueryDialect.class);
 
-        if (dialect != null && !dialect.isEmpty()) {
-            json.put("dialect", new JSONObject(dialect));
-        }
+        RequestQuery requestQuery = new RequestQuery(dialectObject, query);
 
-        return createBody(json.toString());
+        String jsonString = gson.toJson(requestQuery);
+        return createBody(jsonString);
     }
 
     protected void query(@Nonnull final Call<ResponseBody> queryCall,

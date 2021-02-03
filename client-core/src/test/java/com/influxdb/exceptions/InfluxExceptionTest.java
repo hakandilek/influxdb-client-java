@@ -30,7 +30,6 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
 import org.assertj.core.api.Assertions;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
@@ -201,8 +200,8 @@ class InfluxExceptionTest {
                     throw new InfluxException(new HttpException(response));
                 })
                 .matches((Predicate<Throwable>) throwable -> {
-                    JSONObject errorBody1 = ((InfluxException) throwable).errorBody();
-                    JSONObject errorBody2 = ((InfluxException) throwable).errorBody();
+                    ErrorBody errorBody1 = ((InfluxException) throwable).errorBody();
+                    ErrorBody errorBody2 = ((InfluxException) throwable).errorBody();
                     return errorBody1.toString().equals("{\"error\":\"error-body\"}") && errorBody1.equals(errorBody2);
                 });
     }

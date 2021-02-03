@@ -21,6 +21,9 @@
  */
 package com.influxdb.client.flux.internal;
 
+import static com.influxdb.internal.QueryDialect.DEFAULT_DIALECT;
+import static com.influxdb.internal.QueryDialect.EMPTY_DIALECT;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -331,7 +334,7 @@ public class FluxApiImpl extends AbstractQueryApi implements FluxClient {
         Arguments.checkNotNull(onError, "onError");
         Arguments.checkNotNull(onComplete, "onComplete");
 
-        queryRaw(query, null, onResponse, onError, onComplete);
+        queryRaw(query, EMPTY_DIALECT.toString(), onResponse, onError, onComplete);
     }
 
     @Override

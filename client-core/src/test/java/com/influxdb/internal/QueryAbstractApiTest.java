@@ -21,6 +21,9 @@
  */
 package com.influxdb.internal;
 
+import static com.influxdb.internal.QueryDialect.DEFAULT_DIALECT;
+
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +110,7 @@ class QueryAbstractApiTest extends AbstractMockServerTest {
     @Test
     void createBodyDefaultDialect() throws IOException {
 
-        RequestBody body = queryClient.createBody(AbstractQueryApi.DEFAULT_DIALECT.toString(), "from(bucket:\"telegraf\")");
+        RequestBody body = queryClient.createBody(DEFAULT_DIALECT.toString(), "from(bucket:\"telegraf\")");
 
         Buffer buffer = new Buffer();
         body.writeTo(buffer);

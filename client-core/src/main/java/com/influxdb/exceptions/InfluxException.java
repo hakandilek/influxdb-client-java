@@ -28,7 +28,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import okhttp3.ResponseBody;
-import org.json.JSONObject;
 import retrofit2.HttpException;
 import retrofit2.Response;
 
@@ -45,7 +44,7 @@ public class InfluxException extends RuntimeException {
     private final Response<?> response;
     private final String message;
 
-    private JSONObject errorBody = new JSONObject();
+    private ErrorBody errorBody = new ErrorBody();
 
     public InfluxException(@Nullable final String message) {
 
@@ -118,7 +117,7 @@ public class InfluxException extends RuntimeException {
      * @return a response body
      */
     @Nonnull
-    public JSONObject errorBody() {
+    public ErrorBody errorBody() {
 
         return errorBody;
     }
@@ -131,9 +130,10 @@ public class InfluxException extends RuntimeException {
             try {
                 ResponseBody body = response.errorBody();
                 if (body != null) {
-                    errorBody = new JSONObject(body.source().readUtf8());
-                    if (errorBody.has("message")) {
-                        return errorBody.getString("message");
+                    String jsonString = body.source().readUtf8();
+                    errorBody = ErrorBody.fromJson(jsonString);
+                    if (errorBody.hasMessage()) {
+                        return errorBody.getMessage();
                     }
                 }
             } catch (Exception e) {
